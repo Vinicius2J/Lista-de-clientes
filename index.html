@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de contatos</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        main {
+            padding: 10px;
+            height: 80vh;
+        }
+
+        form {
+            margin: 10px;
+            border: 1px solid grey;
+            border-radius: 2px;
+            padding: 20px;
+            box-shadow: 1px 1px grey;
+            text-align: center;
+        }
+
+        input {
+            margin-bottom: 5px;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+
+        input[type="text"] {
+            padding: 5px;
+            outline: none;
+            width: 90%;
+        }
+
+        input[type="submit"] {
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            width: 50%;
+            background-color: lightgreen;
+        }
+
+        .list {
+            padding: 10px;
+            margin-top: 10px;
+            height: 60%;
+            background-color: lightyellow;
+
+            font-family: Arial, Helvetica, sans-serif ;
+        }
+
+        ul {
+            list-style: none;
+            height: 100%;
+        }
+
+        li {
+            border-bottom: 1px solid darkblue;
+            margin-top: 5px;
+
+            font-family: monospace;
+        }
+
+        button {
+            margin-left: 10px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <form>
+            <input type="hidden" name="id" />
+            <input name="nome" type="text" maxlength="50" placeholder="Nome" required />
+            <input name="telefone" type="text" maxlength="9" placeholder="Telefone" required />
+            <input type="submit" value="Salvar" />
+        </form>
+        <div class="lsit">
+            <input id="pesquisar"    type="text" placeholder="Pesquisar" onkeyup="listar(this.value)"/>
+            <ul>
+
+            </ul>
+        </div>
+    </main>
+
+    <script>
+        let lista = localStorage.getItem("minhaLista");
+
+        const formulario = document.querySelector("form");
+        const listaPessoas = document.querySelector("ul");
+
+        if (lista) {
+            lista = JSON.parse(lista);
+        }else {
+            lista = [];
+        }
+
+        formulario.addEventListener('submit', function (e) {
+            e.preventDefault();
+            let novaPessoa = new Object ();
+            novaPessoa.nome = this.nome.value;
+            novaPessoa.telefone = this.telefone.value;
+
+            if(this.id.value !== "" && this.id.value >= 0){
+                lista[this.id.value] = novaPessoa;
+            } else {
+                lista.push(novaPessoa);
+            }
+
+            this.reset();
+            this.id.value = null;
+
+            salvarLS();
+
+            listar();
+        })
+
+        function listar(filtro='') {
+            listaPessoas.innerHTML = "";
+            lista.forEach((item,key) => {
+
+                if (item.nome.toUpperCase().indexOf(filtro.toUpperCase()) >= 0 || filtro == "") { 
+                linha = document.createElement('li');
+
+                let s = `<button onClick="excluir(${key})">[Excluir]</button> <button onClick="editar(${key})">[Editar]</button>`;
+
+                linha.innerHTML = `Nome: ${item.nome} Telefone: ${item.telefone} ${s}`;
+                listaPessoas.appendChild(linha);  
+            };
+
+            });
+        };
+
+
+        function excluir(id) {
+            formulario.reset();
+            lista.splice(id, 1);
+            salvarLS();
+            listar();
+        };
+
+        function editar(id) {
+            formulario.id.value = id;
+            formulario.nome.value = lista[id].nome;
+            formulario.telefone.value = lista[id].telefone;
+        }
+
+        function salvarLS() {
+            localStorage.setItem("minhaLista", JSON.stringify(lista));
+        };
+    </script>
+</body>
+</html>
